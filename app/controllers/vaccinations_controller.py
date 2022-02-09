@@ -40,8 +40,8 @@ def create_vaccined_person():
 
         return jsonify(new_person_vaccined), HTTPStatus.CREATED
 
-    # except  NotAstringError : 
-    #     return {"msg":"All the fields on the body must be strings"}, HTTPStatus.BAD_REQUEST
+    except  NotAstringError : 
+        return {"msg":"All the fields on the body must be strings"}, HTTPStatus.BAD_REQUEST
 
     except MissingFieldError:
         return {"msg": "Your body request is missing one or more of the following keys -> cpf, name, vaccine_name, health_unit_name"},  HTTPStatus.BAD_REQUEST
