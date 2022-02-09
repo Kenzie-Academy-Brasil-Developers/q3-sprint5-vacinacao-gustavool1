@@ -38,17 +38,10 @@ def create_vaccined_person():
         current_app.db.session.commit()
         print(new_person_vaccined)
 
-        return{
-            "cpf":new_person_vaccined.cpf,
-            "name":new_person_vaccined.name,
-            "first_shot_date":new_person_vaccined.first_shot_date,
-            "second_shot_date":new_person_vaccined.second_shot_date,
-            "vaccine_name": new_person_vaccined.vaccine_name,
-            "health_unit_name":new_person_vaccined.health_unit_name
-        }, HTTPStatus.CREATED
+        return jsonify(new_person_vaccined), HTTPStatus.CREATED
 
-    except  NotAstringError : 
-        return {"msg":"All the fields on the body must be strings"}, HTTPStatus.BAD_REQUEST
+    # except  NotAstringError : 
+    #     return {"msg":"All the fields on the body must be strings"}, HTTPStatus.BAD_REQUEST
 
     except MissingFieldError:
         return {"msg": "Your body request is missing one or more of the following keys -> cpf, name, vaccine_name, health_unit_name"},  HTTPStatus.BAD_REQUEST
