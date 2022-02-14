@@ -1,4 +1,4 @@
-from app.exceptions.MissingFieldError import MissingFieldError
+from http.client import BAD_REQUEST
 from app.exceptions.NotAstringError import NotAstringError
 from app.models.person_vaccined_model import PersonVaccined
 from flask import jsonify, request, current_app
@@ -10,40 +10,30 @@ def create_vaccined_person():
     try: 
         necessarie_keys = ["cpf", "name", "vaccine_name", "health_unit_name"]
         data = request.get_json()
-        print('testtttt', all(item in necessarie_keys for item in data.keys()))
-        if all(item in necessarie_keys for item in data.keys()):
-            raise MissingFieldError
 
         for value in data.values():
             if not type(value) is str:
                 raise NotAstringError 
 
-        data["name"] = data["name"].title()
-        data["vaccine_name"] = data["vaccine_name"].title()
-        data["health_unit_name"] = data["health_unit_name"].title()
+        for character in data["cpf"]:
+            if character not in ["0","1","2","3","4","5","6","7","8","9"]:
+                return {"msg":"CPF field allows only number"}, HTTPStatus.BAD_REQUEST 
 
-        data["first_shot_date"] = str(datetime.now().strftime("%d/%m/%Y %H:%M"))
-        second_shot_date = datetime.today() + timedelta(days=+90)
-        data["second_shot_date"] = str(second_shot_date.strftime("%d/%m/%Y %H:%M"))
-        new_person_vaccined = {
-            "cpf":data["cpf"],
-            "name":data["name"], 
-            "vaccine_name":data["vaccine_name"],
-            "health_unit_name":data["health_unit_name"],
-            "first_shot_date":data["first_shot_date"],
-            "second_shot_date":data["second_shot_date"] 
-        }
-        new_person_vaccined = PersonVaccined(**new_person_vaccined)
+        data["name"] = data["name"].upper()
+        data["vaccine_name"] = data["vaccine_name"].upper()
+        data["health_unit_name"] = data["health_unit_name"].upper()
+
+        
+        new_person_vaccined = PersonVaccined(**data)
         current_app.db.session.add(new_person_vaccined)
         current_app.db.session.commit()
-        print(new_person_vaccined)
 
         return jsonify(new_person_vaccined), HTTPStatus.CREATED
 
     except  NotAstringError : 
         return {"msg":"All the fields on the body must be strings"}, HTTPStatus.BAD_REQUEST
 
-    except MissingFieldError:
+    except KeyError:
         return {"msg": "Your body request is missing one or more of the following keys -> cpf, name, vaccine_name, health_unit_name"},  HTTPStatus.BAD_REQUEST
 
     except IntegrityError:
@@ -51,6 +41,7 @@ def create_vaccined_person():
     
     except DataError:
         return {"msg":"CPF field should have 11 digits"}, HTTPStatus.BAD_REQUEST
+
 
 
 
